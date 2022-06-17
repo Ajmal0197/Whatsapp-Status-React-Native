@@ -1,0 +1,38 @@
+{
+  "name": "WasaltGalleryPOC",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint .",
+    "cleanCache": "npx react-native start --reset-cache",
+    "adb": "adb reverse tcp:9090 tcp:9090 && adb reverse tcp:8081 tcp:8081 && adb reverse tcp:3000 tcp:3000"
+  },
+  "dependencies": {
+    "@react-navigation/native": "^6.0.10",
+    "react": "17.0.1",
+    "react-native": "0.64.2",
+    "react-native-gesture-handler": "^1.10.3",
+    "react-native-modal": "^13.0.1",
+    "react-native-pager-view": "^5.4.9",
+    "react-native-reanimated": "^2.2.2",
+    "react-native-tab-view": "2.15.2",
+    "react-native-youtube-iframe": "^2.2.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.5",
+    "@babel/runtime": "^7.18.3",
+    "@react-native-community/eslint-config": "^3.0.2",
+    "babel-jest": "^28.1.1",
+    "eslint": "^8.17.0",
+    "jest": "^28.1.1",
+    "metro-react-native-babel-preset": "^0.71.1",
+    "react-test-renderer": "17.0.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
