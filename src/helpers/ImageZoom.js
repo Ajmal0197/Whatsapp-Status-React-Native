@@ -1,8 +1,11 @@
 import React, {useRef, useState} from 'react';
 import {ActivityIndicator, Image, StyleSheet} from 'react-native';
 import {
+  LongPressGestureHandler,
   PanGestureHandler,
   PinchGestureHandler,
+  State,
+  TapGestureHandler,
 } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedGestureHandler,
@@ -14,21 +17,6 @@ import {clamp, noop} from './index';
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    flexGrow: 1,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  loader: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'whitesmoke',
-  },
-});
 
 export default function ImageZoom({
   uri = '',
@@ -45,6 +33,10 @@ export default function ImageZoom({
   onPinchEnd = noop,
   onPanStart = noop,
   onPanEnd = noop,
+  onLongPressActiveInteration = noop,
+  onLongPressEndInteration = noop,
+  onSwipeTapForNext = noop,
+  onSwipeTapForPrev = noop,
   style = {},
   containerStyle = {},
   imageContainerStyle = {},
@@ -59,6 +51,7 @@ export default function ImageZoom({
   const isInteracting = useRef(false);
   const isPanning = useRef(false);
   const isPinching = useRef(false);
+  const doubleTapRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [state, setState] = useState({
@@ -178,6 +171,29 @@ export default function ImageZoom({
     setIsLoading(false);
   };
 
+  const onLongPress = event => {
+    if (event.nativeEvent.state === State.ACTIVE) {
+      onLongPressActiveInteration();
+    }
+    if (
+      event.nativeEvent.state === State.END ||
+      event.nativeEvent.state === State.CANCELLED
+    ) {
+      onLongPressEndInteration();
+    }
+  };
+
+  const onSingleTapEvent = event => {
+    let e = event.nativeEvent;
+    if (e.state === State.ACTIVE) {
+      if (e.x < getDeviceWidth() / 2) {
+        // onSwipeTapForPrev();
+      } else {
+        // onSwipeTapForNext();
+      }
+    }
+  };
+
   return (
     <PinchGestureHandler
       ref={pinchRef}
@@ -203,20 +219,32 @@ export default function ImageZoom({
           <Animated.View
             onLayout={onLayout}
             style={[styles.content, imageContainerStyle]}>
-            <AnimatedImage
-              style={[styles.container, style, animatedStyle]}
-              source={{uri}}
-              resizeMode={resizeMode}
-              onLoadEnd={onImageLoadEnd}
-              {...props}
-            />
-
+            <TapGestureHandler
+              waitFor={doubleTapRef}
+              onHandlerStateChange={onSingleTapEvent}>
+              <TapGestureHandler
+                ref={doubleTapRef}
+                onHandlerStateChange={noop}
+                numberOfTaps={2}>
+                <LongPressGestureHandler
+                  onHandlerStateChange={onLongPress}
+                  minDurationMs={800}>
+                  <AnimatedImage
+                    style={[styles.container, style, animatedStyle]}
+                    source={{uri}}
+                    resizeMode={resizeMode}
+                    onLoadEnd={onImageLoadEnd}
+                    {...props}
+                  />
+                </LongPressGestureHandler>
+              </TapGestureHandler>
+            </TapGestureHandler>
             {isLoading &&
               (renderLoader ? (
                 renderLoader()
               ) : (
                 <ActivityIndicator
-                  size="small"
+                  size="large"
                   style={styles.loader}
                   color="dimgrey"
                   {...activityIndicatorProps}
